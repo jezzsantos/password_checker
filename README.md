@@ -24,12 +24,14 @@ A simple and intuitive password strength tester built with Python and Tkinter.
 ## Installation
 
 1. Clone this repository:
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/password-strength-tester.git
 cd password-strength-tester
 ```
 
 2. Run the application:
+
 ```bash
 python password_tester.py
 ```
@@ -45,6 +47,7 @@ python password_tester.py
 ## Password Strength Criteria
 
 The password strength is calculated based on:
+
 - **Length**: Longer passwords get higher scores
 - **Character variety**: Mix of uppercase, lowercase, numbers, and special characters
 - **Strength levels**: Very Weak, Weak, Medium, Strong, Very Strong
@@ -52,6 +55,7 @@ The password strength is calculated based on:
 ## Screenshot
 
 The application displays:
+
 - Password input field with show/hide option
 - Strength level with color-coded text
 - Progress bar visualization
