@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Password Generator</title>
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- React and Babel CDN -->
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <!-- Letter Glitch Background Canvas -->
+    <canvas id="glitch-canvas" class="glitch-background"></canvas>
+
+    <div id="root"></div>
+
+    <!-- Letter Glitch Background Script -->
+    <script src="LetterGlitch.js"></script>
+    <script>
+      // Initialize the letter glitch background
+      document.addEventListener("DOMContentLoaded", function () {
+        const canvas = document.getElementById("glitch-canvas");
+        new LetterGlitch({
+          canvas: canvas,
+          glitchColors: ["#2b4539", "#61dca3", "#61b3dc"],
+          glitchSpeed: 50,
+          smooth: true,
+          centerVignette: false,
+          outerVignette: true,
+        });
+      });
+    </script>
+
+    <!-- React Components -->
+    <script type="text/babel" src="PasswordGenerator.jsx"></script>
+    <script type="text/babel" src="appGenerator.js"></script>
+  </body>
+</html>
