@@ -1,4 +1,4 @@
-# Password Strength Tester & Generator
+# SecureEnough
 
 A modern web-based password strength tester and generator with an animated letter glitch background effect. Built with React, vanilla JavaScript, HTML, and CSS.
 
@@ -60,6 +60,8 @@ The home page features a custom **Letter Glitch Animation** inspired by [ReactBi
 git clone https://github.com/DeltaHotelSierra/password_checker.git
 cd password_checker
 ```
+
+**Project Name**: SecureEnough
 
 2. **Open in browser**:
 
