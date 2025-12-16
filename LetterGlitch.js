@@ -1,152 +1,244 @@
-// Letter Glitch Background Animation
-class LetterGlitch {
-    constructor(options = {}) {
-        this.canvas = options.canvas;
-        this.ctx = this.canvas.getContext('2d');
-        
-        // Configuration
-        this.glitchColors = options.glitchColors || ['#2b4539', '#61dca3', '#61b3dc'];
-        this.glitchSpeed = options.glitchSpeed || 50;
-        this.smooth = options.smooth !== undefined ? options.smooth : true;
-        this.centerVignette = options.centerVignette || false;
-        this.outerVignette = options.outerVignette !== undefined ? options.outerVignette : true;
-        this.characters = options.characters || 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789';
-        
-        // Animation state
-        this.letters = [];
-        this.animationFrame = null;
-        this.lastTime = 0;
-        
-        this.init();
-    }
-    
-    init() {
-        this.resize();
-        window.addEventListener('resize', () => this.resize());
-        this.createLetters();
-        this.animate(0);
-    }
-    
-    resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-    }
-    
-    createLetters() {
-        const cols = Math.floor(this.canvas.width / 20);
-        const rows = Math.floor(this.canvas.height / 20);
-        
-        this.letters = [];
-        
-        for (let i = 0; i < cols; i++) {
-            for (let j = 0; j < rows; j++) {
-                this.letters.push({
-                    x: i * 20,
-                    y: j * 20,
-                    char: this.getRandomChar(),
-                    color: this.getRandomColor(),
-                    opacity: Math.random() * 0.5 + 0.1,
-                    speed: Math.random() * 0.5 + 0.5,
-                    nextChange: Math.random() * 1000
-                });
-            }
+const { useRef, useEffect } = React;
+
+const LetterGlitch = ({
+  glitchColors = ['#2b4539', '#61dca3', '#61b3dc'],
+  className = '',
+  glitchSpeed = 50,
+  centerVignette = false,
+  outerVignette = true,
+  smooth = true,
+  characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789'
+}) => {
+  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+  const letters = useRef([]);
+  const grid = useRef({ columns: 0, rows: 0 });
+  const context = useRef(null);
+  const lastGlitchTime = useRef(Date.now());
+
+  const lettersAndSymbols = Array.from(characters);
+
+  const fontSize = 16;
+  const charWidth = 10;
+  const charHeight = 20;
+
+  const getRandomChar = () => {
+    return lettersAndSymbols[Math.floor(Math.random() * lettersAndSymbols.length)];
+  };
+
+  const getRandomColor = () => {
+    return glitchColors[Math.floor(Math.random() * glitchColors.length)];
+  };
+
+  const hexToRgb = hex => {
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, (m, r, g, b) => {
+      return r + r + g + g + b + b;
+    });
+
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
         }
+      : null;
+  };
+
+  const interpolateColor = (start, end, factor) => {
+    const result = {
+      r: Math.round(start.r + (end.r - start.r) * factor),
+      g: Math.round(start.g + (end.g - start.g) * factor),
+      b: Math.round(start.b + (end.b - start.b) * factor)
+    };
+    return `rgb(${result.r}, ${result.g}, ${result.b})`;
+  };
+
+  const calculateGrid = (width, height) => {
+    const columns = Math.ceil(width / charWidth);
+    const rows = Math.ceil(height / charHeight);
+    return { columns, rows };
+  };
+
+  const initializeLetters = (columns, rows) => {
+    grid.current = { columns, rows };
+    const totalLetters = columns * rows;
+    letters.current = Array.from({ length: totalLetters }, () => ({
+      char: getRandomChar(),
+      color: getRandomColor(),
+      targetColor: getRandomColor(),
+      colorProgress: 1
+    }));
+  };
+
+  const resizeCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = parent.getBoundingClientRect();
+
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+
+    if (context.current) {
+      context.current.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-    
-    getRandomChar() {
-        return this.characters.charAt(Math.floor(Math.random() * this.characters.length));
+
+    const { columns, rows } = calculateGrid(rect.width, rect.height);
+    initializeLetters(columns, rows);
+
+    drawLetters();
+  };
+
+  const drawLetters = () => {
+    if (!context.current || letters.current.length === 0) return;
+    const ctx = context.current;
+    const { width, height } = canvasRef.current.getBoundingClientRect();
+    ctx.clearRect(0, 0, width, height);
+    ctx.font = `${fontSize}px monospace`;
+    ctx.textBaseline = 'top';
+
+    letters.current.forEach((letter, index) => {
+      const x = (index % grid.current.columns) * charWidth;
+      const y = Math.floor(index / grid.current.columns) * charHeight;
+      ctx.fillStyle = letter.color;
+      ctx.fillText(letter.char, x, y);
+    });
+  };
+
+  const updateLetters = () => {
+    if (!letters.current || letters.current.length === 0) return;
+
+    const updateCount = Math.max(1, Math.floor(letters.current.length * 0.05));
+
+    for (let i = 0; i < updateCount; i++) {
+      const index = Math.floor(Math.random() * letters.current.length);
+      if (!letters.current[index]) continue;
+
+      letters.current[index].char = getRandomChar();
+      letters.current[index].targetColor = getRandomColor();
+
+      if (!smooth) {
+        letters.current[index].color = letters.current[index].targetColor;
+        letters.current[index].colorProgress = 1;
+      } else {
+        letters.current[index].colorProgress = 0;
+      }
     }
-    
-    getRandomColor() {
-        return this.glitchColors[Math.floor(Math.random() * this.glitchColors.length)];
-    }
-    
-    animate(currentTime) {
-        const deltaTime = currentTime - this.lastTime;
-        this.lastTime = currentTime;
-        
-        // Clear canvas
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Update and draw letters
-        this.letters.forEach(letter => {
-            letter.nextChange -= deltaTime;
-            
-            if (letter.nextChange <= 0) {
-                letter.char = this.getRandomChar();
-                letter.color = this.getRandomColor();
-                letter.nextChange = Math.random() * (2000 / this.glitchSpeed) + (1000 / this.glitchSpeed);
-                
-                if (!this.smooth) {
-                    letter.opacity = Math.random() * 0.5 + 0.1;
-                }
-            }
-            
-            if (this.smooth) {
-                letter.opacity += (Math.random() - 0.5) * 0.02;
-                letter.opacity = Math.max(0.1, Math.min(0.6, letter.opacity));
-            }
-            
-            // Draw letter
-            this.ctx.font = '12px monospace';
-            this.ctx.fillStyle = letter.color;
-            this.ctx.globalAlpha = letter.opacity;
-            this.ctx.fillText(letter.char, letter.x, letter.y);
-        });
-        
-        // Reset global alpha
-        this.ctx.globalAlpha = 1;
-        
-        // Draw vignettes
-        if (this.centerVignette) {
-            this.drawCenterVignette();
+  };
+
+  const handleSmoothTransitions = () => {
+    let needsRedraw = false;
+    letters.current.forEach(letter => {
+      if (letter.colorProgress < 1) {
+        letter.colorProgress += 0.05;
+        if (letter.colorProgress > 1) letter.colorProgress = 1;
+
+        const startRgb = hexToRgb(letter.color);
+        const endRgb = hexToRgb(letter.targetColor);
+        if (startRgb && endRgb) {
+          letter.color = interpolateColor(startRgb, endRgb, letter.colorProgress);
+          needsRedraw = true;
         }
-        
-        if (this.outerVignette) {
-            this.drawOuterVignette();
-        }
-        
-        this.animationFrame = requestAnimationFrame((time) => this.animate(time));
+      }
+    });
+
+    if (needsRedraw) {
+      drawLetters();
     }
-    
-    drawCenterVignette() {
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
-        const radius = Math.min(this.canvas.width, this.canvas.height) / 3;
-        
-        const gradient = this.ctx.createRadialGradient(
-            centerX, centerY, 0,
-            centerX, centerY, radius
-        );
-        
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.3)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  };
+
+  const animate = () => {
+    const now = Date.now();
+    if (now - lastGlitchTime.current >= glitchSpeed) {
+      updateLetters();
+      drawLetters();
+      lastGlitchTime.current = now;
     }
-    
-    drawOuterVignette() {
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
-        const radius = Math.max(this.canvas.width, this.canvas.height) * 0.7;
-        
-        const gradient = this.ctx.createRadialGradient(
-            centerX, centerY, radius * 0.5,
-            centerX, centerY, radius
-        );
-        
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
-        
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    if (smooth) {
+      handleSmoothTransitions();
     }
-    
-    destroy() {
-        if (this.animationFrame) {
-            cancelAnimationFrame(this.animationFrame);
-        }
-        window.removeEventListener('resize', () => this.resize());
-    }
-}
+
+    animationRef.current = requestAnimationFrame(animate);
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    context.current = canvas.getContext('2d');
+    resizeCanvas();
+    animate();
+
+    let resizeTimeout;
+
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        cancelAnimationFrame(animationRef.current);
+        resizeCanvas();
+        animate();
+      }, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+      window.removeEventListener('resize', handleResize);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [glitchSpeed, smooth]);
+
+  const containerStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#000000',
+    overflow: 'hidden',
+    zIndex: 0,
+    pointerEvents: 'none'
+  };
+
+  const canvasStyle = {
+    display: 'block',
+    width: '100%',
+    height: '100%'
+  };
+
+  const outerVignetteStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+    background: 'radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,1) 100%)'
+  };
+
+  const centerVignetteStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+    background: 'radial-gradient(circle, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%)'
+  };
+
+  return React.createElement('div', { style: containerStyle, className: className },
+    React.createElement('canvas', { ref: canvasRef, style: canvasStyle }),
+    outerVignette && React.createElement('div', { style: outerVignetteStyle }),
+    centerVignette && React.createElement('div', { style: centerVignetteStyle })
+  );
+};

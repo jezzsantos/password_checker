@@ -125,14 +125,22 @@ function PasswordGenerator() {
     }, []);
 
     return (
-        <div className="container">
-            <div className="card">
-                <nav className="nav-links">
-                    <a href="index.html" className="nav-link active">Password Generator</a>
-                    <a href="tester.html" className="nav-link">Password Tester</a>
-                </nav>
+        <>
+            <LetterGlitch 
+                glitchColors={['#2b4539', '#61dca3', '#61b3dc']}
+                glitchSpeed={50}
+                smooth={true}
+                centerVignette={false}
+                outerVignette={true}
+            />
+            <div className="container">
+                <div className="card">
+                    <nav className="nav-links">
+                        <a href="index.html" className="nav-link active">Password Generator</a>
+                        <a href="tester.html" className="nav-link">Password Tester</a>
+                    </nav>
 
-                <h1 className="title">Password Generator</h1>
+                    <h1 className="title">Password Generator</h1>
 
                 {/* Generated Password Display */}
                 <div className="password-display">
@@ -242,5 +250,6 @@ function PasswordGenerator() {
                 </button>
             </div>
         </div>
+        </>
     );
 }
