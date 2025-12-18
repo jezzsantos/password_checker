@@ -15,7 +15,7 @@ function PasswordStrengthTester() {
     });
 
     // Bulk testing state
-    const [bulkPasswords, setBulkPasswords] = useState('');
+    const [bulkPasswords, setBulkPasswords] = useState([{ id: 1, value: '' }]);
     const [bulkResults, setBulkResults] = useState(null);
 
     const strengthColors = {
@@ -95,8 +95,7 @@ function PasswordStrengthTester() {
 
     const analyzeBulkPasswords = () => {
         const passwords = bulkPasswords
-            .split('\n')
-            .map(p => p.trim())
+            .map(p => p.value.trim())
             .filter(p => p.length > 0);
 
         if (passwords.length === 0) {
@@ -147,6 +146,56 @@ function PasswordStrengthTester() {
             strengthCounts,
             totalCount: passwords.length
         });
+    };
+
+    const addPasswordField = () => {
+        const newId = Math.max(...bulkPasswords.map(p => p.id)) + 1;
+        setBulkPasswords([...bulkPasswords, { id: newId, value: '' }]);
+    };
+
+    const removePasswordField = (id) => {
+        if (bulkPasswords.length > 1) {
+            setBulkPasswords(bulkPasswords.filter(p => p.id !== id));
+        }
+    };
+
+    const updatePasswordField = (id, value) => {
+        setBulkPasswords(bulkPasswords.map(p => 
+            p.id === id ? { ...p, value } : p
+        ));
+    };
+
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            // Extract potential passwords - look for non-empty lines or words
+            const extractedPasswords = text
+                .split(/[\n\r\s,;]+/)
+                .map(p => p.trim())
+                .filter(p => p.length >= 3 && p.length <= 128) // Reasonable password length
+                .filter(p => p.length > 0);
+
+            if (extractedPasswords.length === 0) {
+                alert('No passwords found in the document.');
+                return;
+            }
+
+            // Create new password fields from extracted passwords
+            const newPasswordFields = extractedPasswords.map((pwd, index) => ({
+                id: index + 1,
+                value: pwd
+            }));
+
+            setBulkPasswords(newPasswordFields);
+            // Clear the file input
+            event.target.value = '';
+        } catch (error) {
+            console.error('Error reading file:', error);
+            alert('Error reading file. Please make sure it\'s a text file.');
+        }
     };
 
     useEffect(() => {
@@ -262,17 +311,46 @@ function PasswordStrengthTester() {
                 ) : (
                     <>
                         <div className="bulk-section">
-                            <label htmlFor="bulk-input" className="input-label">
-                                Paste Multiple Passwords (one per line):
-                            </label>
-                            <textarea
-                                id="bulk-input"
-                                value={bulkPasswords}
-                                onChange={(e) => setBulkPasswords(e.target.value)}
-                                className="bulk-textarea"
-                                placeholder="password123&#10;MySecureP@ss&#10;weak&#10;VeryStr0ng!Pass&#10;..."
-                                rows="8"
-                            />
+                            <div className="bulk-header">
+                                <label className="input-label">
+                                    Enter Passwords to Analyze:
+                                </label>
+                                <label className="scan-document-button">
+                                    <input
+                                        type="file"
+                                        accept=".txt,.csv,.log"
+                                        onChange={handleFileUpload}
+                                        style={{ display: 'none' }}
+                                    />
+                                    📄 Scan Document
+                                </label>
+                            </div>
+                            <div className="password-fields-container">
+                                {bulkPasswords.map((pwd, index) => (
+                                    <div key={pwd.id} className="bulk-password-field">
+                                        <span className="field-number">{index + 1}</span>
+                                        <input
+                                            type="text"
+                                            value={pwd.value}
+                                            onChange={(e) => updatePasswordField(pwd.id, e.target.value)}
+                                            className="bulk-password-input"
+                                            placeholder="Enter password..."
+                                        />
+                                        {bulkPasswords.length > 1 && (
+                                            <button
+                                                onClick={() => removePasswordField(pwd.id)}
+                                                className="remove-field-button"
+                                                title="Remove this field"
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            <button onClick={addPasswordField} className="add-field-button">
+                                + Add Another Password
+                            </button>
                             <button onClick={analyzeBulkPasswords} className="analyze-button">
                                 Analyze Passwords
                             </button>

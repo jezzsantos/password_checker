@@ -1,4 +1,4 @@
-const { useState, useEffect } = React;
+const { useState, useEffect, useCallback } = React;
 
 function PasswordGenerator() {
     const [password, setPassword] = useState('');
@@ -28,7 +28,7 @@ function PasswordGenerator() {
         special: '!@#$%^&*()_+-=[]{};\':"|,.<>?/\\`~'
     };
 
-    const generatePassword = () => {
+    const generatePassword = useCallback(() => {
         let availableChars = '';
         let generatedPassword = '';
 
@@ -51,7 +51,7 @@ function PasswordGenerator() {
 
         setPassword(generatedPassword);
         setCopied(false);
-    };
+    }, [options, length]);
 
     const copyToClipboard = async () => {
         if (!password) return;
@@ -124,19 +124,50 @@ function PasswordGenerator() {
         generatePassword();
     }, []);
 
+    // Auto-regenerate password when length or options change
+    useEffect(() => {
+        generatePassword();
+    }, [generatePassword]);
+
+    const editCharacter = useCallback((index) => {
+        let availableChars = '';
+        if (options.uppercase) availableChars += charSets.uppercase;
+        if (options.lowercase) availableChars += charSets.lowercase;
+        if (options.numbers) availableChars += charSets.numbers;
+        if (options.special) availableChars += charSets.special;
+
+        if (availableChars === '') {
+            availableChars = charSets.uppercase + charSets.lowercase + charSets.numbers + charSets.special;
+        }
+
+        const randomIndex = Math.floor(Math.random() * availableChars.length);
+        const newChar = availableChars[randomIndex];
+        const newPassword = password.substring(0, index) + newChar + password.substring(index + 1);
+        setPassword(newPassword);
+    }, [options, password]);
+
     return (
         <div className="card">
             <h2 className="title">Password Generator</h2>
 
                 {/* Generated Password Display */}
                 <div className="password-display">
-                    <input
-                        type="text"
-                        value={password}
-                        readOnly
-                        className="generated-password"
-                        placeholder="Click generate to create password"
-                    />
+                    <div className="generated-password">
+                        {password ? (
+                            password.split('').map((char, index) => (
+                                <span
+                                    key={index}
+                                    className="password-char"
+                                    onClick={() => editCharacter(index)}
+                                    title="Click to change this character"
+                                >
+                                    {char}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="password-placeholder">Click generate to create password</span>
+                        )}
+                    </div>
                     <button
                         onClick={copyToClipboard}
                         className="copy-button"
@@ -195,37 +226,49 @@ function PasswordGenerator() {
                 <div className="options-section">
                     <h3 className="options-title">Include Characters:</h3>
                     <div className="options-grid">
-                        <label className="option-item">
-                            <input
-                                type="checkbox"
-                                checked={options.uppercase}
-                                onChange={() => handleOptionChange('uppercase')}
-                            />
-                            <span>Uppercase (A-Z)</span>
+                        <label className="toggle-option">
+                            <span className="toggle-label">Uppercase (A-Z)</span>
+                            <div className="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    checked={options.uppercase}
+                                    onChange={() => handleOptionChange('uppercase')}
+                                />
+                                <span className="toggle-slider"></span>
+                            </div>
                         </label>
-                        <label className="option-item">
-                            <input
-                                type="checkbox"
-                                checked={options.lowercase}
-                                onChange={() => handleOptionChange('lowercase')}
-                            />
-                            <span>Lowercase (a-z)</span>
+                        <label className="toggle-option">
+                            <span className="toggle-label">Lowercase (a-z)</span>
+                            <div className="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    checked={options.lowercase}
+                                    onChange={() => handleOptionChange('lowercase')}
+                                />
+                                <span className="toggle-slider"></span>
+                            </div>
                         </label>
-                        <label className="option-item">
-                            <input
-                                type="checkbox"
-                                checked={options.numbers}
-                                onChange={() => handleOptionChange('numbers')}
-                            />
-                            <span>Numbers (0-9)</span>
+                        <label className="toggle-option">
+                            <span className="toggle-label">Numbers (0-9)</span>
+                            <div className="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    checked={options.numbers}
+                                    onChange={() => handleOptionChange('numbers')}
+                                />
+                                <span className="toggle-slider"></span>
+                            </div>
                         </label>
-                        <label className="option-item">
-                            <input
-                                type="checkbox"
-                                checked={options.special}
-                                onChange={() => handleOptionChange('special')}
-                            />
-                            <span>Special (!@#$%)</span>
+                        <label className="toggle-option">
+                            <span className="toggle-label">Special (!@#$%)</span>
+                            <div className="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    checked={options.special}
+                                    onChange={() => handleOptionChange('special')}
+                                />
+                                <span className="toggle-slider"></span>
+                            </div>
                         </label>
                     </div>
                 </div>

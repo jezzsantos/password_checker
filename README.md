@@ -118,8 +118,7 @@ Passwords are scored based on:
 - **Lowercase Letters**: a-z (15pts)
 - **Numbers**: 0-9 (15pts)
 - **Special Characters**: !@#$%^&\*() etc. (15pts)
-
-**Strength Levels**:
+- **Strength Levels**:
 
 - 🔴 Very Weak: < 30%
 - 🟠 Weak: 30-49%
