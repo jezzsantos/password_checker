@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SecureEnough - Password Generator</title>
+    <title>SecureEnough - Password Generator & Strength Tester</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="StaggeredMenu.css" />
 
@@ -32,6 +32,13 @@
 
     <!-- React Components -->
     <script type="text/babel" src="PasswordGenerator.jsx"></script>
-    <script type="text/babel" src="appGenerator.js"></script>
+    <script type="text/babel" src="PasswordStrengthTester.jsx"></script>
+    <script type="text/babel" src="MainApp.jsx"></script>
+
+    <!-- Initialize App -->
+    <script type="text/babel">
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<MainApp />);
+    </script>
   </body>
 </html>

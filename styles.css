@@ -4,16 +4,35 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #0a0a0a;
     min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Snap Scrolling Container */
+.snap-container {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+.snap-section {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
     position: relative;
-    overflow: hidden;
 }
 
 /* Letter Glitch Background */
@@ -755,5 +774,276 @@ body {
 
     .password-strength {
         font-size: 11px;
+    }
+}
+
+/* ===================================
+   HEADER SECTION
+   =================================== */
+
+.header-section {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+    color: white;
+    text-align: center;
+}
+
+.hero-content {
+    max-width: 800px;
+    padding: 40px 20px;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-title {
+    font-size: 72px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #61dca3 0%, #4CAF50 50%, #61b3dc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.hero-subtitle {
+    font-size: 28px;
+    color: #b0b0b0;
+    margin-bottom: 20px;
+    font-weight: 300;
+}
+
+.hero-description {
+    font-size: 18px;
+    color: #888;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-cta {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 60px;
+    flex-wrap: wrap;
+}
+
+.cta-button {
+    padding: 16px 40px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.cta-button.primary {
+    background: linear-gradient(135deg, #4CAF50 0%, #61dca3 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.cta-button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(76, 175, 80, 0.5);
+}
+
+.cta-button.secondary {
+    background: transparent;
+    color: #61dca3;
+    border: 2px solid #61dca3;
+}
+
+.cta-button.secondary:hover {
+    background: rgba(97, 220, 163, 0.1);
+    transform: translateY(-2px);
+}
+
+.scroll-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-size: 14px;
+    animation: bounce 2s infinite;
+}
+
+.scroll-indicator svg {
+    width: 24px;
+    height: 24px;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* ===================================
+   FOOTER SECTION
+   =================================== */
+
+.footer-section {
+    background: linear-gradient(135deg, #1a1a2e 0%, #0a0a0a 100%);
+    color: white;
+    padding: 60px 20px;
+}
+
+.footer-content {
+    max-width: 1200px;
+    width: 100%;
+}
+
+.footer-brand {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.footer-brand h2 {
+    font-size: 48px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #61dca3 0%, #4CAF50 50%, #61b3dc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+}
+
+.footer-brand p {
+    font-size: 18px;
+    color: #888;
+}
+
+.footer-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+.footer-column h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #61dca3;
+    margin-bottom: 20px;
+}
+
+.footer-column ul {
+    list-style: none;
+}
+
+.footer-column ul li {
+    margin-bottom: 12px;
+}
+
+.footer-column ul li a {
+    color: #b0b0b0;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-size: 16px;
+}
+
+.footer-column ul li a:hover {
+    color: #61dca3;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 40px;
+    border-top: 1px solid #333;
+}
+
+.footer-bottom p {
+    color: #666;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.footer-note {
+    font-size: 13px;
+    color: #555;
+    font-style: italic;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 48px;
+    }
+
+    .hero-subtitle {
+        font-size: 22px;
+    }
+
+    .hero-description {
+        font-size: 16px;
+    }
+
+    .cta-button {
+        padding: 14px 32px;
+        font-size: 16px;
+    }
+
+    .footer-brand h2 {
+        font-size: 36px;
+    }
+
+    .footer-links {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 36px;
+    }
+
+    .hero-subtitle {
+        font-size: 18px;
+    }
+
+    .hero-cta {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cta-button {
+        width: 100%;
+        max-width: 280px;
     }
 }

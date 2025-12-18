@@ -1,17 +1,6 @@
 const { useState, useEffect } = React;
 
 function PasswordStrengthTester() {
-    // Menu items configuration
-    const menuItems = [
-        { label: 'Generator', link: 'index.html' },
-        { label: 'Tester', link: 'tester.html' }
-    ];
-
-    const socialItems = [
-        { label: 'GitHub', link: 'https://github.com/deltahotelsierra/password_checker' },
-        { label: 'Email', link: 'mailto:deltahotelsierra@hotmail.com' }
-    ];
-
     const [mode, setMode] = useState('single'); // 'single' or 'bulk'
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -186,25 +175,8 @@ function PasswordStrengthTester() {
     ];
 
     return (
-        <>
-            <StaggeredMenu 
-                items={menuItems}
-                socialItems={socialItems}
-                position="right"
-                colors={{
-                    background: '#0a0a0a',
-                    accent: '#4CAF50',
-                    text: '#ffffff'
-                }}
-            />
-            <div className="container">
-                <div className="card">
-                    <nav className="nav-links">
-                        <a href="index.html" className="nav-link">Password Generator</a>
-                        <a href="tester.html" className="nav-link active">Password Tester</a>
-                    </nav>
-
-                <h1 className="title">Password Strength Tester</h1>
+        <div className="card">
+            <h2 className="title">Password Strength Tester</h2>
 
                 {/* Mode Toggle */}
                 <div className="mode-toggle">
@@ -372,8 +344,6 @@ function PasswordStrengthTester() {
                     </>
                 )}
 
-            </div>
         </div>
-        </>
     );
 }
